@@ -1,16 +1,21 @@
-## ¼ò½é
+## ç®€ä»‹
 
 
-[Î¢ĞÅÍøÒ³°æ](https://wx.qq.com/)Ç°¶Ë¿ËÂ¡
+[å¾®ä¿¡ç½‘é¡µç‰ˆ](https://wx.qq.com/)å‰ç«¯å…‹éš†
 
 
-½öÓÃÓÚÑ§Ï°¡¢·ÖÎö
+ä»…ç”¨äºå­¦ä¹ ã€åˆ†æ
 
 
-## Ö÷ÒªÄ£¿é
+## ä¸»è¦æ¨¡å—
 
-### ÊµÊ±Í¨ĞÅÄ£¿é
+### å®æ—¶é€šä¿¡æ¨¡å—
 
-[Ö÷ÒªjsÎÄ¼ş](res.wx.qq.com/a/wx_fed/webwx/res/static/js/index_ca360ff.js)
+[ä¸»è¦jsæ–‡ä»¶](res.wx.qq.com/a/wx_fed/webwx/res/static/js/index_ca360ff.js)
+
+
+## å…¶ä»–èµ„æºé“¾æ¥
+
+- https://github.com/geeeeeeeeek/electronic-wechat
 
 
