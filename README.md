@@ -11,5 +11,6 @@
 
 ### 实时通信模块
 
+[主要js文件](res.wx.qq.com/a/wx_fed/webwx/res/static/js/index_ca360ff.js)
 
 
