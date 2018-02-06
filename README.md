@@ -21,5 +21,5 @@
 
 - [微信网页版的 JavaScript 实现，兼容Node和浏览器，微信机器人](https://github.com/nodeWechat/wechat4u)
 - [微信网页版的 Python 实现，包含终端版微信及微信机器人](https://github.com/Urinx/WeixinBot)
-
+- [微信抢红包插件--基于安卓](https://github.com/geeeeeeeeek/WeChatLuckyMoney)
 
