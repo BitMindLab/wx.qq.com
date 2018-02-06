@@ -17,5 +17,6 @@
 ## 其他资源链接
 
 - https://github.com/geeeeeeeeek/electronic-wechat
+- [网页版微信抓包+注入实现表情贴纸显示](https://github.com/geeeeeeeeek/electronic-wechat/issues/2)
 
 
