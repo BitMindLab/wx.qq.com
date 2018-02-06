@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>WeChat for Web</title>
+    <meta name="keywords" content="Web WeChat&#44; weixin web&#44; wechat&#44; weixin pc&#44; wexin for pc&#44; wechat web&#44; wexin web&#44; wexin pc" >
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://js.aq.qq.com/js/aq_common.js"></script>
+    <script type="text/javascript">if(window.top!== window.self){top.location=self.location;}</script>
+    <link rel="shortcut icon" href="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/3wOU-7F.ico" type="image/x-icon"/>
+    <link rel="icon" sizes="192x192" href="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/qMUjOdv.png" type="image/png" />
+    <link rel="icon" sizes="128x128" href="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2kAS7mD.png" type="image/png" />
+    <link rel="apple-touch-icon" sizes="128x128" href="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2kAS7mD.png" type="image/png" />
+    <!--style-->
+    <!--style-->
+    <!--[if lt IE 9]>
+      <script src="//res.wx.qq.com/a/wx_fed/webwx/res/es5-shim_es5-sham_html5shiv.min.js"></script>
+    <![endif]-->
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="//res.wx.qq.com/a/wx_fed/webwx/res/json3.min.js"></script>
+
+    <![endif]-->
+<link rel="stylesheet" href="//res.wx.qq.com/a/wx_fed/webwx/res/static/css/12edccc6099f46713d664410cd78082e.css"/></head>
+<body draggable="false" mm-action-track track-type='resize' ng-controller="appController" ng-class="{loaded:isLoaded,unlogin:isUnLogin}" ng-click="appClick($event)">
+    <canvas style="position:absolute;top:0;left:0;bottom:0;right:0;z-index:-1;width:100%;height:100%;" id="heroCanvas"></canvas>
+
+    <!--[if lt IE 8]>
+    <p class="browsehappy">
+      你正在使用一个<strong>过时</strong>的浏览器。请<a class="link" href="http://browsehappy.com" target="_blank">升级你的浏览器</a>以查看微信网页版。</p>
+    </p>
+    <![endif]-->
+
+    <!--BEGIN login-->
+    <div class="login" ng-controller="loginController" ng-if="false">
+
+    <!--BEGIN logo-->
+        <div class="logo">
+            <i class="web_wechat_login_logo"></i>
+        </div>
+        <!--END logo-->
+        <!--BEGIN login_box-->
+        <div class="login_box">
+            <div class="qrcode" ng-class="{hide: isScan || isAssociationLogin || isBrokenNetwork}">
+                <img class="img" mm-error="qrcodeException()" ng-class="{'qrcode_expired': isNeedRefresh}" mm-src="{{qrcodeUrl}}"  mm-src-load="qrcodeLoad" mm-src-parallel mm-src-timeout="10" mm-src-retry-count="2" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2z6meE1.gif">
+                <div ng-show="!isNeedRefresh">
+                    <p class="sub_title">Scan to log in to WeChat</p>
+                    <p class="sub_desc">Log in on phone to use WeChat on Web</p>
+                </div>
+                <div ng-show="isNeedRefresh">
+                    <div class="refresh_qrcode_mask">
+                        <i class="icon-refresh" ng-class="{rotateLoading: isRotateLoading}" ng-click="refreshQrcode()"></i>
+                    </div>
+                    <p class="refresh_tips">QR Code expired&#44;Click Refresh</p>
+                </div>
+            </div>
+            <div class="avatar" ng-class="{show: !isAssociationLogin && !isBrokenNetwork && isScan}">
+                <img class="img" mm-src="{{userAvatar}}" alt="" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png"/>
+                <h4 class="sub_title">Scan successful</h4>
+                <p class="tips">Confirm login on mobile WeChat</p>
+                <a href="javascript:;" ng-click="isScan = false;" class="action">Switch Account</a>
+            </div>
+            <div class="association" ng-class="{show: isAssociationLogin && !isBrokenNetwork}">
+                <img class="img" mm-src="{{userAvatar}}" alt="" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png"/>
+                <p ng-show="isWaitingAsConfirm" class="waiting_confirm">Confirm login on mobile WeChat</p>
+                <a href="javascript:;" ng-show="!isWaitingAsConfirm" ng-click="associationLogin()" class="button button_primary">Log in</a>
+                <a href="javascript:;" ng-click="qrcodeLogin()" class="button button_default">Switch Account</a>
+            </div>
+            <div class="broken_network" ng-class="{show: isBrokenNetwork}">
+                <div class="icon-broken-logo"></div>
+                <h4 class="sub_title">Network unavailable</h4>
+                <p class="sub_desc">Please check your network configuration</p>
+            </div>
+        </div>
+        <!--END login_box-->
+        <!--BEGIN lang-->
+        <div class="lang">
+            <a ng-if="isMacOS" href="http://weixin.qq.com/cgi-bin/readtemplate?t=mac&platform=wx&lang=en_US" target="_blank">WeChat for Mac</a>
+            <span ng-if="isMacOS" class="sep"></span>
+            <a ng-if="isIPad" href="http://weixin.qq.com/cgi-bin/readtemplate?t=ipad_weixin&platform=wx&lang=en_US" target="_blank">WeChat for iPad</a>
+            <span ng-if="isIPad" class="sep"></span>
+            <a ng-if="isWindows" href="http://weixin.qq.com/cgi-bin/readtemplate?t=win_weixin&platform=wx&lang=en_US" target="_blank">WeChat for Windows</a>
+            <span ng-if="isWindows" class="sep"></span>
+            <a class="lang-item" href="?lang=zh_CN">简体中文</a>
+            <span class="sep"></span>
+            <a class="lang-item" href="?lang=zh_TW">繁體中文</a>
+            <span class="sep"></span>
+            <a class="lang-item" href="?lang=en_US">English</a>
+        </div>
+
+        <!--END lang-->
+        <!--BEGIN copyright-->
+        <div class="copyright">
+            <p class="desc">&copy; 1998 - 2018 Tencent Inc. All Rights Reserved</p>
+        </div>
+        <!--END copyright-->
+    </div>
+    <!--END login-->
+    <!--BEGIN main-->
+    <div class="main">
+        <div class="main_inner" ng-right-click="showContextMenu($event)">
+            <!--BEGIN panel-->
+            <!--inline[views/panel.html]-->
+            <div class="panel">
+
+    <!--BEGIN header-->
+    <div class="header">
+        <div class="avatar">
+            <img class="img" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{account.HeadImgUrl}}"  ng-click="showProfile($event)"/>
+        </div>
+        <div class="info">
+            <h3 class="nickname">
+                <span ng-bind-html="account.NickName" class="display_name"></span>
+                <a class="opt" href="javascript:;" ng-show="account.HeadImgUrl" ng-click="toggleSystemMenu()"><i class="web_wechat_add"></i></a>
+            </h3>
+            <!--<p class="signature" ng-bind-html="account.Signature" title="{{account.Signature|emojiHideFilter}}"></p>-->
+        </div>
+    </div>
+    <!--END header-->
+
+    <!--BEGIN search-->
+    <div class="search_bar" id="search_bar">
+        <i class="web_wechat_search"></i>
+        <input mm-action-track track-type="['focus']" track-opt="{'target':'顶部搜索'}" class="frm_search" type="text" ng-model="keyword" ng-input="search($event)" ng-keydown="searchKeydown($event)" ng-blur="focus = false;" placeholder='Search' />
+    </div>
+    <!--END search-->
+
+    <!--BEGIN tab-->
+    <div class="tab" ng-class="{no_reader: !isShowReader}">
+        <div class="tab_item">
+            <a class="chat" ui-sref="chat" ng-dblclick="dblclickChat()" title='聊天'><i class="web_wechat_tab_chat" ng-class="{web_wechat_tab_chat_hl: $state.includes('chat')}"></i></a>
+        </div>
+        <div class="tab_item" ng-if="isShowReader">
+            <a class="chat" ui-sref="read" title='阅读'><i class="web_wechat_tab_public" ng-class="{web_wechat_tab_public_hl: $state.includes('read')}"></i></a>
+        </div>
+        <div class="tab_item no_extra">
+            <a class="chat" ui-sref="contact" title='通讯录'><i class="web_wechat_tab_friends" ng-class="{web_wechat_tab_friends_hl: $state.includes('contact')}"></i></a>
+        </div>
+    </div>
+    <!--END tab-->
+
+    <!--BEGIN nav view-->
+    <div ui-view="navView" id="navView"></div>
+
+    <div class="nav_view" ng-style="{visibility:$state.current.name ==='chat'?'visible':'hidden',width:$state.current.name ==='chat'?'auto':'0'}" nav-chat-directive ></div>
+    <div class="nav_view" ng-style="{visibility:$state.current.name ==='contact'?'visible':'hidden',width:$state.current.name ==='contact'?'auto':'0'}" nav-contact-directive ></div>
+    <div class="nav_view" ng-style="{visibility:$state.current.name ==='read'?'visible':'hidden',width:$state.current.name ==='read'?'auto':'0'}" nav-read-directive ></div>
+
+    <!--</div>-->
+    <!--END nav view-->
+</div>
+            <!--END panel-->
+
+            <!--BEGIN chat-->
+            <div ui-view="contentView" style="height:100%;"></div>
+            <!--END chat-->
+
+            <!--BEGIN contextMenu-->
+            <div context-menu-directive></div>
+            <!--END contextMenu-->
+        </div>
+        <p class="copyright">
+            <span>&copy; 1998 - 2018 Tencent Inc. All Rights Reserved</span>
+            <span class="sep"></span>
+            <a href="https://login.weixin.qq.com/faq_webwx?lang=en_US" target="_blank">Help</a>
+        </p>
+    </div>
+    <div style="position:absolute;top:0;left:0;width:0;height:0;">
+        <audio id="voiceMsgPlayer" class="voicePlayer"></audio>
+        <audio id="msgNoticePlayer" class="voicePlayer"></audio>
+    </div>
+    <!--END main-->
+    <!--inline[views/widget.html]-->
+    <script type="text/ng-template" id="chatRoomMember.html">
+<div class=" members" >
+    <div jquery-scrollbar ng-if="currentContact.isRoomContact()" class="scrollbar-dynamic members_inner" ng-init="isShowDelIcon=false">
+        <div class="member opt">
+            <i class="web_wechat_add_friends" ng-click="addCharRoomMember()"></i>
+        </div>
+        <div class="member opt" ng-if="currentContact.isRoomOwner()">
+            <a class="web_wechat_delete_friends" ng-click="$parent.isShowDelIcon=!($parent.isShowDelIcon)"></a>
+        </div>
+        <div class="member" ng-repeat="item in currentContact.MemberList" title="{{getUserContact(item.UserName,currentContact.UserName).getDisplayName(currentContact.UserName)|emojiHideFilter}}">
+            <img class="avatar" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{getUserContact(item.UserName,currentContact.UserName).HeadImgUrl}}" alt="" ng-click="showProfile($event,item.UserName)" title=""/>
+            <p class="nickname" ng-bind-html="getUserContact(item.UserName,currentContact.UserName).getDisplayName(currentContact.UserName)"></p>
+            <div class="opt" ng-if="$parent.isShowDelIcon && item.UserName != accountUserName"><i class="web_wechat_delete" ng-click="removeMemberFromChatroom(currentContact.UserName,item.UserName)"></i></div>
+        </div>
+    </div>
+    <div ng-if="!currentContact.isRoomContact()" class="members_inner">
+        <div class="member opt">
+            <i class="web_wechat_add_friends" ng-click="createChatroom()"></i>
+        </div>
+        <div class="member" href="javascript:;">
+            <img class="avatar" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2z6meE1.gif" mm-src="{{getUserContact(currentContact.UserName).HeadImgUrl}}" alt="" ng-click="showProfile($event,currentContact.UserName)" title=""/>
+            <p class="nickname" ng-bind-html="getUserContact(currentContact.UserName).getDisplayName()"></p>
+        </div>
+    </div>
+</div>
+</script>
+<script type="text/ng-template" id="expression.html">
+    <div class="expression">
+        <ul class="exp_hd">
+            <li class="exp_hd_item" ng-class="{'active': index == 1}" ng-click="index = 1;">
+                <a href="javascript:;">QQ Faces</a>
+            </li>
+            <li class="exp_hd_item " ng-class="{'active': index == 2}" ng-click="index = 2;">
+                <a href="javascript:;">Emoji</a>
+            </li>
+        </ul>
+        <div jquery-scrollbar class="exp_bd scrollbar-dynamic" ng-click="selectEmoticon($event)">
+            <div class="exp_cont" ng-class="{'active': index == 1}">
+                <div class="qq_face">
+                    <a title="Smile" type="qq" class="face qqface0">Smile</a> <a title="Grimace" type="qq" class="face qqface1">Grimace</a> <a title="Drool" type="qq" class="face qqface2">Drool</a> <a title="Scowl" type="qq" class="face qqface3">Scowl</a> <a title="CoolGuy" type="qq" class="face qqface4">CoolGuy</a> <a title="Sob" type="qq" class="face qqface5">Sob</a> <a title="Shy" type="qq" class="face qqface6">Shy</a> <a title="Silent" type="qq" class="face qqface7">Silent</a> <a title="Sleep" type="qq" class="face qqface8">Sleep</a> <a title="Cry" type="qq" class="face qqface9">Cry</a> <a title="Awkward" type="qq" class="face qqface10">Awkward</a> <a title="Angry" type="qq" class="face qqface11">Angry</a> <a title="Tongue" type="qq" class="face qqface12">Tongue</a> <a title="Grin" type="qq" class="face qqface13">Grin</a> <a title="Surprise" type="qq" class="face qqface14">Surprise</a> <a title="Frown" type="qq" class="face qqface15">Frown</a> <a title="Ruthless" type="qq" class="face qqface16">Ruthless</a> <a title="Blush" type="qq" class="face qqface17">Blush</a> <a title="Scream" type="qq" class="face qqface18">Scream</a> <a title="Puke" type="qq" class="face qqface19">Puke</a> <a title="Chuckle" type="qq" class="face qqface20">Chuckle</a> <a title="Joyful" type="qq" class="face qqface21">Joyful</a> <a title="Slight" type="qq" class="face qqface22">Slight</a> <a title="Smug" type="qq" class="face qqface23">Smug</a> <a title="Hungry" type="qq" class="face qqface24">Hungry</a> <a title="Drowsy" type="qq" class="face qqface25">Drowsy</a> <a title="Panic" type="qq" class="face qqface26">Panic</a> <a title="Sweat" type="qq" class="face qqface27">Sweat</a> <a title="Laugh" type="qq" class="face qqface28">Laugh</a> <a title="Commando" type="qq" class="face qqface29">Commando</a> <a title="Determined" type="qq" class="face qqface30">Determined</a> <a title="Scold" type="qq" class="face qqface31">Scold</a> <a title="Shocked" type="qq" class="face qqface32">Shocked</a> <a title="Shhh" type="qq" class="face qqface33">Shhh</a> <a title="Dizzy" type="qq" class="face qqface34">Dizzy</a> <a title="Tormented" type="qq" class="face qqface35">Tormented</a> <a title="Toasted" type="qq" class="face qqface36">Toasted</a> <a title="Skull" type="qq" class="face qqface37">Skull</a> <a title="Hammer" type="qq" class="face qqface38">Hammer</a> <a title="Wave" type="qq" class="face qqface39">Wave</a> <a title="Speechless" type="qq" class="face qqface40">Speechless</a> <a title="NosePick" type="qq" class="face qqface41">NosePick</a> <a title="Clap" type="qq" class="face qqface42">Clap</a> <a title="Shame" type="qq" class="face qqface43">Shame</a> <a title="Trick" type="qq" class="face qqface44">Trick</a> <a title="Bah！L" type="qq" class="face qqface45">Bah！L</a> <a title="Bah！R" type="qq" class="face qqface46">Bah！R</a> <a title="Yawn" type="qq" class="face qqface47">Yawn</a> <a title="Pooh-pooh" type="qq" class="face qqface48">Pooh-pooh</a> <a title="Shrunken" type="qq" class="face qqface49">Shrunken</a> <a title="TearingUp" type="qq" class="face qqface50">TearingUp</a> <a title="Sly" type="qq" class="face qqface51">Sly</a> <a title="Kiss" type="qq" class="face qqface52">Kiss</a> <a title="Wrath" type="qq" class="face qqface53">Wrath</a> <a title="Whimper" type="qq" class="face qqface54">Whimper</a> <a title="Cleaver" type="qq" class="face qqface55">Cleaver</a> <a title="Watermelon" type="qq" class="face qqface56">Watermelon</a> <a title="Beer" type="qq" class="face qqface57">Beer</a> <a title="Basketball" type="qq" class="face qqface58">Basketball</a> <a title="PingPong" type="qq" class="face qqface59">PingPong</a> <a title="Coffee" type="qq" class="face qqface60">Coffee</a> <a title="Rice" type="qq" class="face qqface61">Rice</a> <a title="Pig" type="qq" class="face qqface62">Pig</a> <a title="Rose" type="qq" class="face qqface63">Rose</a> <a title="Wilt" type="qq" class="face qqface64">Wilt</a> <a title="Lips" type="qq" class="face qqface65">Lips</a> <a title="Heart" type="qq" class="face qqface66">Heart</a> <a title="BrokenHeart" type="qq" class="face qqface67">BrokenHeart</a> <a title="Cake" type="qq" class="face qqface68">Cake</a> <a title="Lightning" type="qq" class="face qqface69">Lightning</a> <a title="Bomb" type="qq" class="face qqface70">Bomb</a> <a title="Dagger" type="qq" class="face qqface71">Dagger</a> <a title="Soccer" type="qq" class="face qqface72">Soccer</a> <a title="Ladybug" type="qq" class="face qqface73">Ladybug</a> <a title="Poop" type="qq" class="face qqface74">Poop</a> <a title="Moon" type="qq" class="face qqface75">Moon</a> <a title="Sun" type="qq" class="face qqface76">Sun</a> <a title="Gift" type="qq" class="face qqface77">Gift</a> <a title="Hug" type="qq" class="face qqface78">Hug</a> <a title="ThumbsUp" type="qq" class="face qqface79">ThumbsUp</a> <a title="ThumbsDown" type="qq" class="face qqface80">ThumbsDown</a> <a title="Shake" type="qq" class="face qqface81">Shake</a> <a title="Peace" type="qq" class="face qqface82">Peace</a> <a title="Fight" type="qq" class="face qqface83">Fight</a> <a title="Beckon" type="qq" class="face qqface84">Beckon</a> <a title="Fist" type="qq" class="face qqface85">Fist</a> <a title="Pinky" type="qq" class="face qqface86">Pinky</a> <a title="RockOn" type="qq" class="face qqface87">RockOn</a> <a title="Nuh-uh" type="qq" class="face qqface88">Nuh-uh</a> <a title="OK" type="qq" class="face qqface89">OK</a> <a title="InLove" type="qq" class="face qqface90">InLove</a> <a title="Blowkiss" type="qq" class="face qqface91">Blowkiss</a> <a title="Waddle" type="qq" class="face qqface92">Waddle</a> <a title="Tremble" type="qq" class="face qqface93">Tremble</a> <a title="Aaagh!" type="qq" class="face qqface94">Aaagh!</a> <a title="Twirl" type="qq" class="face qqface95">Twirl</a> <a title="Kotow" type="qq" class="face qqface96">Kotow</a> <a title="Dramatic" type="qq" class="face qqface97">Dramatic</a> <a title="JumpRope" type="qq" class="face qqface98">JumpRope</a> <a title="Surrender" type="qq" class="face qqface99">Surrender</a> <a title="Hooray" type="qq" class="face qqface100">Hooray</a> <a title="Meditate" type="qq" class="face qqface101">Meditate</a> <a title="Smooch" type="qq" class="face qqface102">Smooch</a> <a title="TaiChi L" type="qq" class="face qqface103">TaiChi L</a> <a title="TaiChi R" type="qq" class="face qqface104">TaiChi R</a>
+                </div>
+            </div>
+            <div class="exp_cont" ng-class="{'active': index == 2}">
+                <div class="emoji_face">
+                    <a title="Laugh" type="emoji" class="face emoji0">Laugh</a><a title="Sick" type="emoji" class="face emoji1">Sick</a><a title="Lol" type="emoji" class="face emoji2">Lol</a><a title="Tongue" type="emoji" class="face emoji3">Tongue</a><a title="Blush" type="emoji" class="face emoji4">Blush</a><a title="Terror" type="emoji" class="face emoji5">Terror</a><a title="Let Down" type="emoji" class="face emoji6">Let Down</a><a title="Speechless" type="emoji" class="face emoji7">Speechless</a><a title="Hey" type="qq" class="face emoji8">Hey</a><a title="Facepalm" type="qq" class="face emoji9">Facepalm</a><a title="Smirk" type="qq" class="face emoji10">Smirk</a><a title="Smart" type="qq" class="face emoji11">Smart</a><a title="Concerned" type="qq" class="face emoji12">Concerned</a><a title="Yeah!" type="qq" class="face emoji13">Yeah!</a><a title="Ghost" type="emoji" class="face emoji14">Ghost</a><a title="Worship" type="emoji" class="face emoji15">Worship</a><a title="Strong" type="emoji" class="face emoji16">Strong</a><a title="Party" type="emoji" class="face emoji17">Party</a><a title="Gift" type="emoji" class="face emoji18">Gift</a><a title="Packet" type="qq" class="face emoji19">Packet</a><a title="Chicken" type="qq" class="face emoji20">Chicken</a><a title="Happy" type="emoji" class="face emoji21">Happy</a><a title="Big Smile" type="emoji" class="face emoji22">Big Smile</a><a title="Glowing" type="emoji" class="face emoji23">Glowing</a><a title="Wink" type="emoji" class="face emoji24">Wink</a><a title="Drool" type="emoji" class="face emoji25">Drool</a><a title="Smooch" type="emoji" class="face emoji26">Smooch</a><a title="Kiss" type="emoji" class="face emoji27">Kiss</a><a title="Grin" type="emoji" class="face emoji28">Grin</a><a title="Satisfied" type="emoji" class="face emoji29">Satisfied</a><a title="Tease" type="emoji" class="face emoji30">Tease</a><a title="CoolGuy" type="emoji" class="face emoji31">CoolGuy</a><a title="Sweat" type="emoji" class="face emoji32">Sweat</a><a title="Low" type="emoji" class="face emoji33">Low</a><a title="Ugh" type="emoji" class="face emoji34">Ugh</a><a title="Anxious" type="emoji" class="face emoji35">Anxious</a><a title="Worried" type="emoji" class="face emoji36">Worried</a><a title="Shocked" type="emoji" class="face emoji37">Shocked</a><a title="D’oh!" type="emoji" class="face emoji38">D’oh!</a><a title="Tear" type="emoji" class="face emoji39">Tear</a><a title="Cry" type="emoji" class="face emoji40">Cry</a><a title="Dizzy" type="emoji" class="face emoji41">Dizzy</a><a title="Upset" type="emoji" class="face emoji42">Upset</a><a title="Angry" type="emoji" class="face emoji43">Angry</a><a title="Zzz" type="emoji" class="face emoji44">Zzz</a><a title="Demon" type="emoji" class="face emoji45">Demon</a><a title="Alien" type="emoji" class="face emoji46">Alien</a><a title="Heart" type="emoji" class="face emoji47">Heart</a><a title="BrokenHeart" type="emoji" class="face emoji48">BrokenHeart</a><a title="Cupid" type="emoji" class="face emoji49">Cupid</a><a title="Twinkle" type="emoji" class="face emoji50">Twinkle</a><a title="Star" type="emoji" class="face emoji51">Star</a><a title="!" type="emoji" class="face emoji52">!</a><a title="?" type="emoji" class="face emoji53">?</a><a title="Asleep" type="emoji" class="face emoji54">Asleep</a><a title="Drops" type="emoji" class="face emoji55">Drops</a><a title="Music" type="emoji" class="face emoji56">Music</a><a title="Fire" type="emoji" class="face emoji57">Fire</a><a title="Poop" type="emoji" class="face emoji58">Poop</a><a title="ThumbsUp" type="emoji" class="face emoji59">ThumbsUp</a><a title="ThumbsDown" type="emoji" class="face emoji60">ThumbsDown</a><a title="Fist" type="emoji" class="face emoji61">Fist</a><a title="Peace" type="emoji" class="face emoji62">Peace</a><a title="Up" type="emoji" class="face emoji63">Up</a><a title="Down" type="emoji" class="face emoji64">Down</a><a title="Right" type="emoji" class="face emoji65">Right</a><a title="Left" type="emoji" class="face emoji66">Left</a><a title="#1" type="emoji" class="face emoji67">#1</a><a title="Kissing" type="emoji" class="face emoji68">Kissing</a><a title="Couple" type="emoji" class="face emoji69">Couple</a><a title="Boy" type="emoji" class="face emoji70">Boy</a><a title="Girl" type="emoji" class="face emoji71">Girl</a><a title="Lady" type="emoji" class="face emoji72">Lady</a><a title="Man" type="emoji" class="face emoji73">Man</a><a title="Angel" type="emoji" class="face emoji74">Angel</a><a title="Skull" type="emoji" class="face emoji75">Skull</a><a title="Lips" type="emoji" class="face emoji76">Lips</a><a title="Sun" type="emoji" class="face emoji77">Sun</a><a title="Rain" type="emoji" class="face emoji78">Rain</a><a title="Cloud" type="emoji" class="face emoji79">Cloud</a><a title="Snowman" type="emoji" class="face emoji80">Snowman</a><a title="Moon" type="emoji" class="face emoji81">Moon</a><a title="Lightning" type="emoji" class="face emoji82">Lightning</a><a title="Waves" type="emoji" class="face emoji83">Waves</a><a title="Cat" type="emoji" class="face emoji84">Cat</a><a title="Doggy" type="emoji" class="face emoji85">Doggy</a><a title="Mouse" type="emoji" class="face emoji86">Mouse</a><a title="Hamster" type="emoji" class="face emoji87">Hamster</a><a title="Rabbit" type="emoji" class="face emoji88">Rabbit</a><a title="Dog" type="emoji" class="face emoji89">Dog</a><a title="Frog" type="emoji" class="face emoji90">Frog</a><a title="Tiger" type="emoji" class="face emoji91">Tiger</a><a title="Koala" type="emoji" class="face emoji92">Koala</a><a title="Bear" type="emoji" class="face emoji93">Bear</a><a title="Pig" type="emoji" class="face emoji94">Pig</a><a title="Cow" type="emoji" class="face emoji95">Cow</a><a title="Boar" type="emoji" class="face emoji96">Boar</a><a title="Monkey" type="emoji" class="face emoji97">Monkey</a><a title="Horse" type="emoji" class="face emoji98">Horse</a><a title="Snake" type="emoji" class="face emoji99">Snake</a><a title="Pigeon" type="emoji" class="face emoji100">Pigeon</a><a title="Chicken" type="emoji" class="face emoji101">Chicken</a><a title="Penguin" type="emoji" class="face emoji102">Penguin</a><a title="Caterpillar" type="emoji" class="face emoji103">Caterpillar</a><a title="Octopus" type="emoji" class="face emoji104">Octopus</a><a title="Fish" type="emoji" class="face emoji105">Fish</a><a title="Whale" type="emoji" class="face emoji106">Whale</a><a title="Dolphin" type="emoji" class="face emoji107">Dolphin</a><a title="Rose" type="emoji" class="face emoji108">Rose</a><a title="Flower" type="emoji" class="face emoji109">Flower</a><a title="Palm" type="emoji" class="face emoji110">Palm</a><a title="Cactus" type="emoji" class="face emoji111">Cactus</a><a title="Candy Box" type="emoji" class="face emoji112">Candy Box</a><a title="Jack-o-lantern" type="emoji" class="face emoji113">Jack-o-lantern</a><a title="Santa" type="emoji" class="face emoji114">Santa</a><a title="Xmas Tree" type="emoji" class="face emoji115">Xmas Tree</a><a title="Bell" type="emoji" class="face emoji116">Bell</a><a title="Balloon" type="emoji" class="face emoji117">Balloon</a><a title="CD" type="emoji" class="face emoji118">CD</a><a title="Camera" type="emoji" class="face emoji119">Camera</a><a title="Film Camera" type="emoji" class="face emoji120">Film Camera</a><a title="Computer" type="emoji" class="face emoji121">Computer</a><a title="TV" type="emoji" class="face emoji122">TV</a><a title="Phone" type="emoji" class="face emoji123">Phone</a><a title="Unlocked" type="emoji" class="face emoji124">Unlocked</a><a title="Locked" type="emoji" class="face emoji125">Locked</a><a title="Key" type="emoji" class="face emoji126">Key</a><a title="Judgement" type="emoji" class="face emoji127">Judgement</a><a title="Light bulb" type="emoji" class="face emoji128">Light bulb</a><a title="Mail" type="emoji" class="face emoji129">Mail</a><a title="Wash" type="emoji" class="face emoji130">Wash</a><a title="Money" type="emoji" class="face emoji131">Money</a><a title="Bomb" type="emoji" class="face emoji132">Bomb</a><a title="Pistol" type="emoji" class="face emoji133">Pistol</a><a title="Pill" type="emoji" class="face emoji134">Pill</a><a title="Football" type="emoji" class="face emoji135">Football</a><a title="Basketball" type="emoji" class="face emoji136">Basketball</a><a title="Soccer" type="emoji" class="face emoji137">Soccer</a><a title="Baseball" type="emoji" class="face emoji138">Baseball</a><a title="Golf" type="emoji" class="face emoji139">Golf</a><a title="Trophy" type="emoji" class="face emoji140">Trophy</a><a title="Invader" type="emoji" class="face emoji141">Invader</a><a title="Singing" type="emoji" class="face emoji142">Singing</a><a title="Guitar" type="emoji" class="face emoji143">Guitar</a><a title="Bikini" type="emoji" class="face emoji144">Bikini</a><a title="Crown" type="emoji" class="face emoji145">Crown</a><a title="Umbrella" type="emoji" class="face emoji146">Umbrella</a><a title="Purse" type="emoji" class="face emoji147">Purse</a><a title="Lipstick" type="emoji" class="face emoji148">Lipstick</a><a title="Ring" type="emoji" class="face emoji149">Ring</a><a title="Gem" type="emoji" class="face emoji150">Gem</a><a title="Coffee" type="emoji" class="face emoji151">Coffee</a><a title="Beer" type="emoji" class="face emoji152">Beer</a><a title="Toast" type="emoji" class="face emoji153">Toast</a><a title="Martini" type="emoji" class="face emoji154">Martini</a><a title="Burger" type="emoji" class="face emoji155">Burger</a><a title="Fries" type="emoji" class="face emoji156">Fries</a><a title="Sphaghetti" type="emoji" class="face emoji157">Sphaghetti</a><a title="Sushi" type="emoji" class="face emoji158">Sushi</a><a title="Noodles" type="emoji" class="face emoji159">Noodles</a><a title="Eggs" type="emoji" class="face emoji160">Eggs</a><a title="Ice Cream" type="emoji" class="face emoji161">Ice Cream</a><a title="Cake" type="emoji" class="face emoji162">Cake</a><a title="Apple" type="emoji" class="face emoji163">Apple</a><a title="Plane" type="emoji" class="face emoji164">Plane</a><a title="Rocket ship" type="emoji" class="face emoji165">Rocket ship</a><a title="Bike" type="emoji" class="face emoji166">Bike</a><a title="Bullet Train" type="emoji" class="face emoji167">Bullet Train</a><a title="Warning" type="emoji" class="face emoji168">Warning</a><a title="Flag" type="emoji" class="face emoji169">Flag</a><a title="Men" type="emoji" class="face emoji170">Men</a><a title="Women" type="emoji" class="face emoji171">Women</a><a title="O" type="emoji" class="face emoji172">O</a><a title="X" type="emoji" class="face emoji173">X</a><a title="Copyright" type="emoji" class="face emoji174">Copyright</a><a title="Registered TM" type="emoji" class="face emoji175">Registered TM</a><a title="Trademark" type="emoji" class="face emoji176">Trademark</a>
+                    <!--<a ng-repeat="item in EmojiList" title="{{item}}" type="emoji" class="face">{{item}}</a>-->
+                </div>
+            </div>
+
+        </div>
+    </div>
+</script> 
+<script type="text/ng-template" id="createChatroom.html">
+<div class="dialog_hd">
+    <h3 class="title" ng-if="ngDialogData.isCreate">New Chat</h3>
+    <h3 class="title" ng-if="ngDialogData.isAdd">Add Members</h3>
+</div>
+<div class="dialog_bd" ng-init="index=0" id="createChatRoomContainer">
+    <ul class="nav_tabs" ng-if="ngDialogData.isCreate">
+        <li class="nav_tab" ng-class="{'selected':$parent.index==0}" ng-click="$parent.index=0">Contacts</li>
+        <li class="nav_tab" ng-class="{'selected':$parent.index==1}" ng-click="$parent.index=1">Groups</li>
+    </ul>
+    <div  contact-picker data-pick-config="pickConfig" data-select-list="selectedUsers" ng-style="{visibility:index==0?'visible':'hidden',width:index==0?'auto':'0',position:index==0?'static':'absolute'}" >
+
+    </div>
+    <div ng-style="{visibility:index==1?'visible':'hidden',width:index==1?'auto':'0',position:index==1?'static':'absolute'}" >
+        <!--BEGIN contact list-->
+        <div contact-list-directive
+             class="rooms"
+             data-all-contacts="chatroomContacts"
+             data-height-calc="chatRoomHeightCalc"
+             data-click-user-callback="selectChatroom"></div>
+        <!--END contact list-->
+    </div>
+
+</div>
+<div class="dialog_ft" ng-if="index==0">
+    <a ng-if="!selectedUsers.length" href="javascript:;" class="button_default">OK</a>
+    <a ng-if="selectedUsers.length && ngDialogData.isCreate" ng-click="create()" href="javascript:;" class="button_primary">OK<span ng-if="selectedUsers.length">({{selectedUsers.length}})</span></a>
+    <a ng-if="selectedUsers.length && ngDialogData.isAdd" ng-click="add()" href="javascript:;" class="button_primary">OK<span ng-if="selectedUsers.length">({{selectedUsers.length}})</span></a>
+</div>
+
+</script>
+<script type="text/ng-template" id="feedback.html">
+<div class="dialog_hd">
+    <h3 class="title">
+        Feedback    </h3>
+</div>
+<div class="dialog_bd">
+    <textarea name="" cols="30" rows="10" ng-model="content" autofocus class="frm_feedback"></textarea>
+</div>
+<div class="dialog_ft">
+    <a href="javascript:" class="btn btn_primary" ng-click="send()">Send</a>
+</div>
+</script> 
+
+<script type="text/ng-template" id="editAreaContactPanel.html">
+<div jquery-scrollbar class="scrollbar-dynamic at_wrp" id="editAreaContactPanel" tabindex="-1" ng-keydown="keydown($event)">
+    <div class="at" >
+        <div mm-repeat="member in memberList" data-height="52" data-buffer-height="200" data-scroll-container=".at_wrp" data-no-cache="true">
+            <div  class="item" ng-class="{'on': (selectIndex == member._index)}" ng-click="click($event)" username="{{member.UserName}}" displayname="{{member.getDisplayName(chatRoomUserName)}}">
+                <div class="avatar">
+                    <img class="img" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{member.HeadImgUrl}}" alt=""/>
+                </div>
+                <div class="info">
+                    <h4 class="nickname" ng-bind-html="member.getDisplayName(chatRoomUserName)"></h4>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</script> 
+
+<script type="text/ng-template" id="imageUploadPreview.html">
+<div class="dialog_hd">
+    <h3 class="title">Send Image</h3>
+</div>
+<div class="dialog_bd">
+    <img class="loading" ng-show="!src" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/a7Nznaj.gif" alt=""/>
+    <img class="img" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2z6meE1.gif" mm-src="{{src}}" alt=""/>
+    <span class="vm_box"></span>
+</div>
+<div class="dialog_ft">
+    <a class="btn btn_default" href="javascript:" ng-click="cancel()">Cancel</a>
+    <a class="btn btn_primary" href="javascript:" ng-click="send()">Send</a>
+</div>
+</script>
+<script type="text/ng-template" id="userProfile.html">
+<div class="profile">
+
+    <div class="avatar">
+        <img class="img" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{user.HeadImgUrl + '&type=big'}}" alt="">
+    </div>
+
+    <div class="nickname_area">
+        <h4 class="nickname" ng-bind-html="user.getDisplayName()"></h4>
+        <i ng-class="{'web_wechat_women': user.Sex == 2, 'web_wechat_men': user.Sex == 1}"></i>
+    </div>
+
+    <p class="signature" ng-bind-html="user.Signature"></p>
+
+    <div class="meta_area">
+        <div class="meta_item">
+            <label ng-if="!user.isRoomContact()" class="label" for="">Alias: </label>
+            <label ng-if="user.isRoomContact()" class="label" for="">Group Name: </label>
+            <p class="value" ng-bind-html="user.RemarkName || user.getDisplayName()"></p>
+        </div>
+        <div class="meta_item" ng-if="user.Province">
+            <label class="label" for="">Region: </label>
+            <p class="value">{{user.Province}} {{user.City}}</p>
+        </div>
+    </div>
+
+    <div class="action_area">
+        <a class="button" ui-sref="chat({userName:user.UserName})" href="javascript:;">Messages</a>
+    </div>
+    <!--<div class="profile_hd">-->
+        <!---->
+    <!--</div>-->
+    <!--<div class="profile_bd">-->
+        <!--<div class="meta">-->
+            <!--&lt;!&ndash; <div class="item">-->
+                <!--<label class="label" for="">WeChat ID</label>-->
+                <!--<span class="value">{{user.UserName}}</span>-->
+            <!--</div> &ndash;&gt;-->
+            <!--<div class="item" ng-if="user.Signature">-->
+                <!--<span class="value" ng-bind-html="user.Signature"></span>-->
+            <!--</div>-->
+            <!--<div class="item location" ng-if="user.Province">-->
+                <!--<span class="value">{{user.Province}} {{user.City}}</span>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="profile_ft">-->
+        <!--<div class="action">-->
+            <!--<a class="send" ui-sref="chat({userName:user.UserName})" href="javascript:;">Messages</a>-->
+        <!--</div>-->
+    <!--</div>-->
+</div>
+</script>
+<script type="text/ng-template" id="miniUserProfile.html">
+<div class="profile_mini">
+    <div class="profile_mini_hd">
+        <img class="avatar" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{contact.HeadImgUrl + '&type=big'}}" alt="">
+        <div class="filter" style="background: url('{{contact.HeadImgUrl}}') no-repeat center bottom; -webkit-background-size: 230px 170px;">
+        </div>
+        <div class="darken"></div>
+        <div class="ext" ng-class="{'show_send_box': isShowSendBox || contact.Signature}">
+            <h3 class="nickname">
+                <span class="nickname_inner" ng-bind-html="contact.NickName"></span>
+                <i class="" ng-class="{'web_wechat_women': contact.Sex == 2, 'web_wechat_men': contact.Sex == 1}"></i>
+                <a ng-if="contact.isContact() && !contact.isBrandContact()" href="javascript:;" class="lunch" ng-click="chat(contact.UserName)">
+                    <i class="web_wechat_tab_launch-chat"></i>
+                </a>
+                <a ng-if="!contact.isBrandContact() && !contact.isContact() && !contact.MMFromVerifyMsg && !isShowSendBox" ng-click="$parent.isShowSendBox=true" href="javascript:;" class="lunch">
+                    <i class="web_wechat_tab_add"></i>
+                </a>
+                <a ng-if="!contact.isContact() && contact.MMFromVerifyMsg" ng-click="verifyUser($event)" href="javascript:;" class="agree">
+                    Validated                </a>
+            </h3>
+            <p class="signature" ng-bind-html="contact.Signature" ng-if="contact.Signature && !isShowSendBox"></p>
+            <div ng-if="isShowSendBox">
+                <input type="text" class="add_user_cont" autofocus ng-model="addUserContent"/>
+                <a ng-if="!contact.isContact() && !contact.MMFromVerifyMsg" ng-click="addUser($event,addUserContent)" href="javascript:;" class="lunch send">Send</a>
+            </div>
+        </div>
+    </div>
+    <div class="profile_mini_bd">
+        <div class="group">
+            <p ng-if="contact.RemarkName" class="value" ng-bind-html="contact.RemarkName" ng-hide="editing" ng-click="editRemarkName()"></p>
+            <p ng-if="!contact.RemarkName" class="value" ng-hide="editing" ng-click="editRemarkName()" >None</p>
+            <div contenteditable="true" ng-show="editing" ng-bind-html="text" class="J_Text" ng-blur="save()" ng-keydown="save($event)"></div>
+            <label class="label" for="">
+                Alias            </label>
+        </div>
+        <div class="group">
+            <p ng-if="contact.Province" class="value">{{contact.Province}} {{contact.City}}</p>
+            <p ng-if="!contact.Province" class="value">None</p>
+            <label class="label" for="">
+                Region            </label>
+        </div>
+    </div>
+</div>
+</script>
+<script type="text/ng-template" id="profile_mini.html">
+<div class="profile_mini">
+    <div class="profile_mini_hd">
+        <div class="avatar">
+            <img class="img" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{contact.HeadImgUrl + '&type=big'}}" alt="">
+        </div>
+    </div>
+    <div class="profile_mini_bd">
+        <div class="nickname_area">
+            <!--BEGIN 发起聊天-->
+            <a class="opt" href="javascript:;"
+               ng-if="contact.isContact() && !contact.isBrandContact()"
+               ng-click="chat(contact.UserName)">
+                <i class="web_wechat_tab_launch-chat"></i>
+            </a>
+            <!--END 发起聊天-->
+            <!--BEGIN 添加好友-->
+            <a class="opt" href="javascript:;"
+               ng-if="!contact.isBrandContact() && !contact.isContact() && !contact.MMFromVerifyMsg && !isShowSendBox && !isOfficialUser"
+               ng-click="$parent.isShowSendBox=true">
+                <i class="web_wechat_tab_add"></i>
+            </a>
+            <!--END 添加好友-->
+            <!--BEGIN 取消添加好友的叉-->
+            <a class="opt" href="javascript:;"
+               ng-if="isShowSendBox" ng-click="$parent.isShowSendBox=false">
+                <i class="web_wechat_tab_close"></i>
+            </a>
+            <!--END 取消添加好友的叉-->
+            <!--BEGIN 通过验证-->
+            <a class="opt" href="javascript:;"
+               ng-if="!contact.isContact() && contact.MMFromVerifyMsg"
+               ng-click="verifyUser($event)">
+                <i class="web_wechat_tab_add"></i>
+            </a>
+            <!--END 通过验证-->
+            <h4 ng-if="!isShowSendBox" class="nickname" ng-bind-html="contact.NickName"></h4>
+            <i ng-if="!isShowSendBox" ng-class="{'web_wechat_women': contact.Sex == 2, 'web_wechat_men': contact.Sex == 1}"></i>
+            <h4 ng-if="isShowSendBox" class="nickname">Add</h4>
+        </div>
+        <div class="meta_area" ng-if="!isShowSendBox">
+            <div class="meta_item" ng-if="!isOfficialUser">
+                <label class="label" for="">Alias: </label>
+                <p class="value J_Text" contenteditable ng-bind-html="contact.RemarkName || MMDefaultRemark" ng-click="editRemarkName()" ng-blur="save()" ng-keydown="save($event)"></p>
+            </div>
+            <div class="meta_item" ng-if="contact.Province">
+                <label class="label" for="">Region: </label>
+                <p class="value">{{contact.Province}} {{contact.City}}</p>
+            </div>
+        </div>
+        <div class="form_area" ng-if="isShowSendBox">
+            <input type="text" class="verify_text" placeholder="Send friend request " ng-model="addUserContent" maxlength="16"/>
+            <a class="button" href="javascript:;" ng-click="addUser($event,addUserContent)">Send</a>
+        </div>
+    </div>
+</div>
+</script> 
+
+<script type="text/ng-template" id="contactList.html">
+<div jquery-scrollbar class="J_ContactScrollBody scrollbar-dynamic contact_list" >
+    <!--BEGIN star contact list-->
+    <div data-no-cache="true"  mm-repeat="item in allContacts" data-height-calc="heightCalc" data-buffer-height="100">
+        <h4 ng-if='item.type=="header"'  class="contact_title">{{item.text}}</h4>
+        <div ng-if='item.type!="header"'
+             contact-item-directive
+             data-user="item"
+             data-click-user-callback="clickUserCallback"
+             ng-dblclick="dblclickCallback(item)"
+             ng-class="{'active':currentContact.UserName == item.UserName}"></div>
+    </div>
+</div>
+</script>
+
+<script type="text/ng-template" id="contactListChooser.html">
+<div class="chooser" >
+    <div jquery-scrollbar id="J_ContactPickerScrollBody"  class="contacts scrollbar-dynamic">
+        <!--BEGIN star contact list-->
+        <div mm-repeat="item in allContacts" data-height-calc="heightCalc" data-buffer-height="100" data-no-cache="true"
+             mm-repeat-keyboard mm-repeat-keyboard-scroll-selector="#J_ContactPickerScrollBody" >
+            <h4 ng-if='item.type=="header"'  class="contact_title">{{item.text}}</h4>
+            <div ng-if='item.type!="header"'
+                 contact-item-chooser-directive
+                 data-user="item"
+                 data-is-check="isCheck"
+                 data-click-user-callback="clickUserCallback"></div>
+        </div>
+
+    </div>
+</div>
+</script> 
+<script type="text/ng-template" id="contactItem.html">
+<div>
+    <h4 class="contact_title" ng-if="showOrderSymbol&&user.MMC">{{user.MMC}}</h4>
+    <div class="contact_item {{className}}" ng-click="clickUserCallback && clickUserCallback(user)">
+        <div class="avatar">
+            <img class="img lazy" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{user.HeadImgUrl}}" alt=""/>
+        </div>
+        <div class="info">
+            <h4 class="nickname" ng-bind-html="user.getDisplayName()"></h4>
+        </div>
+    </div>
+</div>
+</script> 
+<script type="text/ng-template" id="contactItemChooser.html">
+<!--<div ng-if="showOrderc && ($parent.curC!=user.orderC.charAt(0))&&($parent.curC=user.orderC.charAt(0))">{{$parent.curC}}</div>-->
+<div class="contact_item" ng-click="clickUserCallback && clickUserCallback(user)">
+    <div class="opt">
+        <i ng-class='{"web_wechat_choose_wireframe":!isCheck(user.UserName),"web_wechat_choose_green":isCheck(user.UserName)}'></i>
+    </div>
+    <div class="avatar">
+        <img class="img lazy" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{user.HeadImgUrl}}" alt=""/>
+    </div>
+    <div class="info">
+        <h4 class="nickname" ng-bind-html="user.getDisplayName()"></h4>
+    </div>
+</div>
+</script> 
+
+<script type="text/ng-template" id="contextMenu.html">
+<div id="contextMenu" class="dropdown contextMenu open" ng-show="isShowContextMenu" ng-style="contextStyle">
+    <ul class="dropdown_menu">
+        <li ng-repeat="item in contextMenuList" class="{{item.isDisabled?'disabled':''}}">
+            <a ng-if="item.isCopy" clip-copy="item.copyCallBack($event)" clip-click="item.callback()"  id="{{item.id}}" tabindex="-1" href="javascript:;">{{item.content}}</a>
+            <a ng-if="item.isDownload" download href="{{item.downloadUrl}}">{{item.content}}</a>
+            <a ng-if="!item.isCopy && !item.isDownload" id="{{item.id}}" tabindex="-1" href="javascript:;" ng-click="item.callback()">{{item.content}}</a>
+        </li>
+    </ul>
+</div>
+</script> 
+
+<script type="text/ng-template" id="navChat.html">
+<!--BEGIN chat list-->
+<div jquery-scrollbar class="chat_list scrollbar-dynamic" id="J_NavChatScrollBody" data-username="{{currentUserName}}">
+    <p class="ico_loading" ng-hide="chatList.length > 0"><img src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/25x4Rho.gif" alt=""/>Loading...</p>
+
+    <div  data-no-cache="true" mm-repeat="chatContact in chatList track by chatContact.UserName" data-height="64" data-buffer-height="200">
+        <div class="chat_item slide-left"
+             ng-if="!chatContact.isShieldUser()"
+             data-username="{{chatContact.UserName}}"
+             ng-click="itemClick(chatContact.UserName)"
+             ng-class="{'active': (chatContact.UserName == currentUserName),'top':chatContact.isTop()}"
+             data-cm='{"type":"chat","username":"{{chatContact.UserName}}"}'>
+
+            <div class="ext">
+                <p class="attr">{{chatContact.MMDigestTime}}</p>
+                <p ng-if="chatContact.isMuted()" class="attr" ng-class="{'no_time': !chatContact.MMDigestTime}">
+                    <i class="web_wechat_no-remind" ng-class="{'web_wechat_no-remind_hl': (chatContact.UserName == currentUserName)}"></i>
+                </p>
+            </div>
+
+            <div class="avatar">
+                <img class="img" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{chatContact.HeadImgUrl}}" alt=""/>
+
+                <i class="icon web_wechat_reddot" ng-if="chatContact.NoticeCount && chatContact.isMuted()"></i>
+
+                <i class="icon web_wechat_reddot_middle" ng-class="{web_wechat_reddot_middle: chatContact.NoticeCount < 99, web_wechat_reddot_bbig: chatContact.NoticeCount >=99}" ng-if="chatContact.NoticeCount && !chatContact.isMuted()">{{chatContact.NoticeCount>99?'...':chatContact.NoticeCount;}}</i>
+
+            </div>
+
+            <div class="info">
+                <h3 class="nickname">
+                    <span class="nickname_text" ng-bind-html="chatContact.getDisplayName()"></span>
+                    <!--<span class="nickname_count" ng-if="chatContact.MemberList.length">({{chatContact.MemberList.length}})</span>-->
+                </h3>
+
+                <p class="msg" ng-if="chatContact.MMDigest">
+                    <span class="status" ng-if="chatContact.MMStatus == CONF.MSG_SEND_STATUS_SENDING">
+                        <i class="web_wechat_send" ng-class="{'web_wechat_send_w': chatContact.UserName == currentUserName}"></i>
+                    </span>
+                    <span ng-if="chatContact.NoticeCount>1 && chatContact.isMuted()">[{{chatContact.NoticeCount}} message&#40;s&#41;]</span>
+                    <span ng-bind-html="chatContact.MMDigest"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<!--END chat list-->
+</script> 
+
+<script type="text/ng-template" id="navContact.html">
+<!--BEGIN contact list-->
+<div id="navContact"
+     contact-list-directive
+     data-all-contacts="allContacts"
+     data-current-contact="currentContact"
+     data-star-contacts="starContacts"
+     data-chatroom-contacts="chatroomContacts"
+     data-friend-contacts="friendContacts"
+     data-click-user-callback="showProfile"
+     data-dblclick-callback="dblclick"
+        ></div>
+<!--END contact list-->
+</script> 
+
+<script type="text/ng-template" id="navRead.html">
+<!--BEGIN chat list-->
+<div jquery-scrollbar class="read_list scrollbar-dynamic" id="J_NavReadScrollBody">
+
+    <p class="ico_loading" ng-show="subscribeMsgs.defaultValue"><img src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/25x4Rho.gif" alt=""/>Loading...</p>
+    <p class="ico_loading" ng-show="!subscribeMsgs.defaultValue && subscribeMsgs.length == 0">No articles...</p>
+    <div  data-no-cache="true" mm-repeat="readItem in articleList" data-height-calc="heightCalc" data-buffer-height="200" mm-repeat-keyboard mm-repeat-keyboard-scroll-selector="#J_NavReadScrollBody">
+        <div class="just_for_bg" ng-if="readItem.UserName" ng-class="{first: readItem._index === 0}">
+            <div class="read_item_hd">
+                <p class="date">{{readItem.Time|timeFormat}}</p>
+                <div class="avatar">
+                    <img class="img" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2z6meE1.gif" mm-src="{{readItem.HeadImgUrl}}" alt=""/>
+                </div>
+                <p class="info">
+                    <span class="username">{{readItem.NickName}}</span>
+                </p>
+            </div>
+        </div>
+        <div ng-if="!readItem.UserName" class="read_item slide-left"
+             ng-click="itemClick(readItem)"
+             ng-class="{'active': (readItem == currentItem)}"
+                >
+            <div class="cont">
+                <h3 class="title">{{readItem.Title}}</h3>
+            </div>
+            <div class="ext">
+                <div class="cover">
+                    <div class="img" ng-style="{'background-image': 'url('+ readItem.Cover +')'}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--END chat list-->
+</script> 
+
+<script type="text/ng-template" id="contentChat.html">
+<div id="chatArea" ng-class="{'chatRoom':currentContact.isRoomContact(),'no-choose':!currentContact.getDisplayName()}" class="box chat">
+
+
+
+    <!--BEGIN HD-->
+    <div class="box_hd">
+        <!--<a class="ext web_wechat_addfriend" href="javascript:;" ng-click="showChatRoomMembers($event)" ng-show="currentContact.isRoomContact()" title="Members"></a>-->
+        <!--<a class="ext web_wechat_addfriend" href="javascript:;" ng-click="showProfile($event)" ng-show="!currentContact.isRoomContact()" title="Profile"></a>-->
+        <div id="chatRoomMembersWrap"></div>
+        <div class="title_wrap">
+            <div class="title poi" ng-click="currentContact.MMCanCreateChatroom && showChatRoomMembers($event)">
+                <a class="title_name"  data-username="{{currentContact.UserName}}"  ng-bind-html="currentContact.getDisplayName()"></a>
+                <span class="title_count" ng-if="currentContact.MemberList.length">({{currentContact.MemberList.length}})</span>
+                <i class="" ng-class="{'web_wechat_up_icon': isShowChatRoomMembers, 'web_wechat_down_icon': !isShowChatRoomMembers}" ng-show="currentContact.getDisplayName() && currentContact.MMCanCreateChatroom"></i>
+            </div>
+        </div>
+
+    </div>
+    <!--END HD-->
+
+    <div ng-if="unreadMessageCount>10&&!bottomUnreadCount" class="unread" ng-click="scrollToTopUnread()"><span class="unread-up-icon"></span>{{ unreadMessageCount}} new messages</div>
+    <div ng-if="bottomUnreadCount" class="unread-bottom" ng-click="scrollToBottomUnread()"><span class="unread-bottom-icon"></span>{{ bottomUnreadCount }} new messages</div>
+
+    <!--BEGIN BD-->
+    <div
+         jquery-scrollbar
+         class="box_bd chat_bd scrollbar-dynamic"
+         data-cm='{"type":"clean","username":"{{currentUser}}"}'>
+
+
+
+
+        <div mm-repeat="message in chatContent" data-height-calc="heightCalc" data-buffer-height="300" data-pre-calc="true">
+             <div class="clearfix"  message-directive></div>
+        </div>
+
+        <!--<div message-directive
+             ng-repeat="message in chatContent track by message.MsgId"
+             class="clearfix"
+             ng-class="{'slide-top':messagesAnimate}"
+             ></div>
+-->     <div id="prerender"  style="
+      visibility: hidden;
+  position: absolute;
+  width: 100%;
+  top: 333px;
+  height: 0;
+  padding: 0 19px;
+  box-sizing: border-box;
+  margin-left: -19px;
+  overflow: hidden;
+"></div>
+        <div ng-if="chatContent.length < 1" class="message_empty">
+            <i class="web_wechat_nomes_icon" ng-hide="currentContact.getDisplayName()"></i>
+            <p ng-show="currentContact.getDisplayName()">No new messages</p>
+            <p ng-hide="currentContact.getDisplayName()">No chats selected</p>
+        </div>
+    </div>
+    <!--END BD-->
+    <!--BEGIN FT-->
+    <div class="box_ft" ng-controller="chatSenderController" ng-show="currentContact && !currentContact.isReadOnlyContact()">
+        <div class="toolbar" id="tool_bar">
+            <a class="web_wechat_face" ng-click="showEmojiPanel($event)" href="javascript:;" title="Stickers"></a>
+            <a mm-action-track track-type="['click']" track-opt="{'target':'截图'}"class="web_wechat_screencut" ng-hide="noflash" ng-click="screenShot()" href="javascript:;" title="Screenshot"></a>
+            <a mm-action-track track-type="['click']" ng-click="sendClick($event)" track-opt="{'target':'发文件'}"  class="web_wechat_pic js_fileupload" ng-hide="noflash" href="javascript:;" title="Image and File"></a>
+        </div>
+        <div class="content" mm-action-track track-type="['click','keydown']" track-opt="{target:'发送框',keys:['enter','backspace','blankspace']}" >
+            <pre    id="editArea" contenteditable-directive mm-paste class="flex edit_area" contenteditable="true" ng-blur="editAreaBlur($event)" ng-model="editAreaCtn" ng-click="editAreaClick($event)" ng-keyup="editAreaKeyup($event)" ng-keydown="editAreaKeydown($event)"></pre>
+            <span class="caret_pos_helper" id="caretPosHelper"></span>
+        </div>
+
+        <div class="action">
+            <span ng-if="!isMacOS" class="desc">Press Ctrl+Enter to start a new line</span>
+            <span ng-if="isMacOS" class="desc">Press Cmd+Enter to start a new line</span>
+            <a class="btn btn_send" href="javascript:;" ng-click="sendTextMessage()">Send</a>
+        </div>
+    </div>
+    <!--END FT-->
+
+<!--    <div class="upload-file-area" >{{currentContact.getDisplayName()}}</div>-->
+    <div id="J_CatchDrop" class="catch-drop-area"></div>
+</div>
+</script>
+<script type="text/ng-template" id="contentContact.html">
+<div class="box">
+    <div class="box_hd with_border">
+        <div class="title_wrap">
+            <div class="title">Details</div>
+        </div>
+    </div>
+    <div class="box_bd">
+        <div ng-if="currentContact" user-profile-directive data-user="currentContact"></div>
+        <div ng-if="!currentContact" class="empty">
+            <i class="web_wechat_no_contect"></i>
+        </div>
+    </div>
+</div>
+</script> 
+<script type="text/ng-template" id="contentRead.html">
+<div class="box reader">
+    <div class="box_hd with_border read_list_header">
+        <div class="ext" ng-if="readItem">
+            <a href="javascript:;" ng-click="optionMenu();">
+                <i class="titlebar_menuicon"></i>
+            </a>
+        </div>
+        <div class="title_wrap">
+            <div class="title">{{readItem.AppName}}</div>
+        </div>
+    </div>
+    <div class="box_bd">
+        <iframe ng-src="{{readItem.Url}}" frameborder="0" class="iframe" id="reader"></iframe>
+    </div>
+</div>
+</script> 
+
+
+<script type="text/ng-template" id="message.html">
+<div ng-switch on="message.MsgType" style="overflow: hidden;"  ng-init="contact = getUserContact(message.MMActualSender,message.MMPeerUserName);">
+    <!-- 系统消息 -->
+    <div ng-switch-when="10000" ng-init="messageHandle(message);">
+        <div ng-if="(newMsg && newMsg==message)" class="message_system"><div ng-if="(isScrollToUnread && newMsg==message)" class="content unread-content">
+            <div class="line-left"></div>
+            Below are new messages            <div class="line-right"></div>
+        </div></div>
+        <p class="message_system"><span class="content" ng-bind-html="message.MMActualContent"></span></p>
+    </div>
+    <div ng-switch-default class="message" ng-class='{"you":!message.MMIsSend,"me":message.MMIsSend,"first":($index==0&&!message.MMTime)}'>
+        <div ng-if="message.MMTime||(newMsg && newMsg==message)" class="message_system"><div ng-if="(isScrollToUnread && newMsg==message)" class="content unread-content">
+                <div class="line-left"></div>
+            Below are new messages                <div class="line-right"></div>
+            </div><div ng-if="(message.MMTime&&!(newMsg && newMsg==message))" class="content">{{message.MMTime}}</div></div>
+
+
+
+        <img class="avatar" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{getUserContact(message.MMActualSender,message.MMPeerUserName).HeadImgUrl}}" data-cm='{"type":"avatar","username":"{{message.MMActualSender}}","isFriend":"{{getUserContact(message.MMActualSender,message.MMPeerUserName).isContact()}}"}' title="{{getUserContact(message.MMActualSender,message.MMPeerUserName).getDisplayName(message.MMPeerUserName)|emojiHideFilter}}" ng-click="showProfile($event,message.MMActualSender)"/>
+        <div class="content">
+            <h4 ng-if="message.MMIsChatRoom && !message.MMIsSend" class="nickname" ng-bind-html="getUserContact(message.MMActualSender,message.MMPeerUserName).getDisplayName(message.MMPeerUserName)"></h4>
+            <div class="bubble js_message_bubble" ng-if="message.MsgType != CONF.MSGTYPE_EMOTICON" ng-class='{"bubble_default left":!message.MMIsSend,"bubble_primary right":message.MMIsSend, "arrow_primary": message.MsgType == CONF.MSGTYPE_APP && message.AppMsgType == CONF.APPMSGTYPE_URL, "no_arrow": message.MsgType == CONF.MSGTYPE_IMAGE || message.MsgType == CONF.MSGTYPE_MICROVIDEO || message.MsgType == CONF.MSGTYPE_VIDEO}'
+                 data-cm='{"type":"message","actualSender":"{{message.MMActualSender}}",
+                 "msgType":"{{message.MsgType}}","subType":{{message.SubMsgType||0}},"msgId":"{{message.MsgId}}"}'>
+                
+                <!--news消息-->
+                <div class="bubble_cont primary" ng-if="message.MsgType == CONF.MSGTYPE_TEXT && message.MMPeerUserName == 'newsapp'" >
+                    <ul>
+                        <li ng-repeat="newitem in message.MMCategory.newitem">
+                            <a href="{{newitem.url}}">
+                                <img ng-src="{{newitem.cover}}"/>{{newitem.title}}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!--红包消息-->
+                <div class="bubble_cont" ng-if="message.MsgType == CONF.MSGTYPE_APP && message.AppMsgType == CONF.APPMSGTYPE_RED_ENVELOPES">
+                    <div class="luckmoney">
+                        <div class="luckmoney_bd">
+                            <div class="cover">
+                                <i class="web_wechat_redbag"></i>
+                            </div>
+                            <div class="cont">
+                                <h4 class="title">Happy Chinese New Year!</h4>
+                                <p class="desc">Open Lucky Money on phone</p>
+                            </div>
+                        </div>
+                        <div class="luckmoney_ft">
+                            <p>Lucky Money</p>
+                        </div>
+                    </div>
+                </div>
+                <!--纯文本消息-->
+                <div class="bubble_cont" ng-if="message.MsgType == CONF.MSGTYPE_TEXT && message.SubMsgType != CONF.MSGTYPE_LOCATION">
+                    <div class="plain">
+                        <pre class="js_message_plain" ng-bind-html="message.MMActualContent"></pre>
+                        <img ng-show="message.MMStatus == 1" class="ico_loading" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/25x4Rho.gif" alt=""/>
+                        <i class="ico_fail web_wechat_message_fail" ng-click="resendMsg(message)" ng-show="message.MMStatus == 5" title="Resend"></i>
+                    </div>
+                </div>
+
+                <!-- 地理消息 -->
+                <div class="bubble_cont" ng-if="message.MsgType == CONF.MSGTYPE_TEXT && message.SubMsgType == CONF.MSGTYPE_LOCATION">
+                    <div class="location">
+                        <a href="{{message.MMLocationUrl}}" target="_blank">
+                            <img mm-src="/cgi-bin/mmwebwx-bin/webwxgetpubliclinkimg?url=xxx&msgid={{message.MsgIdBeforeTranspond || message.MsgId}}&pictype=location"
+                                 alt="" class="img" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2z6meE1.gif"/>
+                            <p class="desc">{{message.MMLocationDesc}}</p>
+                        </a>
+                    </div>
+                </div>
+
+
+
+                <!--图片消息-->
+                <div class="bubble_cont" ng-if="message.MsgType == CONF.MSGTYPE_IMAGE">
+                    <div class="picture" ng-init="imageInit(message,message.MMPreviewSrc || message.MMThumbSrc || getMsgImg(message.MsgId,'slave'))"  ><!--ng-if="message.MMStatus == CONF.MSG_SEND_STATUS_SUCC"ng-init="(message.MMStatus==CONF.MSG_SEND_STATUS_SUCC)&&(imagesMessagesList.push(getMsgImg(message.MsgId)))" -->
+                        <img class="msg-img" ng-style="message.MMImgStyle" ng-click="previewImg(message)" ng-src="{{message.MMPreviewSrc || message.MMThumbSrc || getMsgImg(message.MsgId,'slave')}}" />
+                        <i class="arrow"></i>
+                        <p class="loading" ng-show="message.MMStatus == 1 || message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_FAIL">
+                            <img src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/25x4Rho.gif" alt=""/>
+                        </p>
+                    </div>
+                </div>
+
+                <!--语音消息-->
+                <div class="bubble_cont" ng-if="message.MsgType == CONF.MSGTYPE_VOICE">
+                    <div class="voice" ng-style="{'width':40 + 7*message.VoiceLength/1000}" ng-click="playVoice(message)">
+                        <i ng-class="{'web_wechat_voice_green':message.MMIsSend,'web_wechat_voice_gray':!message.MMIsSend, 'web_wechat_voice_playing': message.MMPlaying&&message.MMIsSend,'web_wechat_voice_gray_playing': message.MMPlaying&&!message.MMIsSend}"></i>
+                        <span class="duration">{{message.VoiceLength|VoiceLengthFilter}}''<i class="web_wechat_noread"ng-show="message.MMVoiceUnRead"></i></span>
+                    </div>
+                </div>
+
+                <!--视频消息 todo-->
+                <div class="bubble_cont" ng-if="message.MsgType == CONF.MSGTYPE_VIDEO">
+                    <div class="video" ng-click="showVideo(message.MsgId)">
+                         <img height="120" width="160" ng-if="message.MMStatus!=1 && message.MMFileStatus !== CONF.MM_SEND_FILE_STATUS_FAIL" class="msg-img"  ng-style="message.MMImgStyle" mm-src="{{getMsgImg(message.MsgId,'slave')}}" />
+                        <i ng-if="message.MMStatus!=1 && message.MMFileStatus !== CONF.MM_SEND_FILE_STATUS_FAIL" class="web_wechat_paly"></i>
+                        <i ng-if="message.MMStatus!=1 && message.MMFileStatus !== CONF.MM_SEND_FILE_STATUS_FAIL" class="arrow"></i>
+                        <img  ng-if="message.MMStatus == 1 || message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_FAIL" class="msg-img"  src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2z6meE1.gif" width="160" height="120" alt="">
+
+                        <p class="loading" ng-show="message.MMStatus == 1 || message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_FAIL">
+                            <img src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/25x4Rho.gif" alt=""/>
+                        </p>
+                    </div>
+
+                </div>
+
+                <!--小视频消息-->
+                <div class="bubble_cont" ng-if="message.MsgType == CONF.MSGTYPE_MICROVIDEO" ng-click="showMicroVideo(message.MsgId)">
+                    <div jplayer-directive
+                           id="jplayer-{{message.MsgId}}"
+                           class="jp-jplayer microvideo"
+                           ng-src="{{getMsgVideo(message.MsgId)}}"
+                           poster="{{getMsgImg(message.MsgId,'slave')}}"
+                           ng-class="{'loaded':loaded}"
+                           timeout="10"
+                           autoplay
+                           loop
+                           muted></div>
+                </div>
+
+
+                <!--名片消息-->
+                <div class="bubble_cont primary" ng-if="message.MsgType == CONF.MSGTYPE_SHARECARD" ng-click="showProfile($event,message.RecommendInfo.UserName)">
+                    <div class="card">
+                        <div class="card_hd"><p ng-if="message.RecommendInfo.VerifyFlag">Official Account Contact Card</p><p ng-if="!message.RecommendInfo.VerifyFlag">Contact Card</p></div>
+                        <div class="card_bd">
+                            <div class="card_avatar">
+                                <img class="img" mm-src="{{message.RecommendInfo.HeadImgUrl}}" alt=""/>
+                            </div>
+                            <div class="info">
+                                <h3 class="display_name" ng-bind-html="message.RecommendInfo.NickName"></h3>
+                                <!--<p class="signature" ng-bind-html="message.MMUserName"></p>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!--朋友验证消息-->
+                <div class="bubble_cont primary" ng-if="message.MsgType == CONF.MSGTYPE_VERIFYMSG" ng-click="showProfile($event,message.RecommendInfo.UserName)">
+                    <div class="card">
+                        <div class="card_hd"><p>Friend Request</p></div>
+                        <div class="card_bd">
+                            <div class="card_avatar">
+                                <img class="img" mm-src="{{message.RecommendInfo.HeadImgUrl}}" alt=""/>
+                            </div>
+                            <div class="info">
+                                <h3 class="display_name" ng-bind-html="message.RecommendInfo.NickName"></h3>
+                                <p class="signature"><span ng-bind-html="message.RecommendInfo.NickName"></span>:<span ng-bind-html="message.RecommendInfo.Content"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--链接消息-->
+                <div class="bubble_cont primary" ng-if="message.MsgType == CONF.MSGTYPE_APP && message.AppMsgType == CONF.APPMSGTYPE_URL">
+                    <a ng-href="{{message.Url|checkurlFilter}}" ng-click="appMsgClick($event,message.MMAlert)" target="_blank" class="app">
+                        <h4 class="title" ng-bind="message.FileName"></h4>
+                        <img class="cover" mm-src="{{getMsgImg(message.MsgIdBeforeTranspond || message.MsgId,'slave')}}"  alt=""/>
+                        <p class="desc" ng-bind="message.MMAppMsgDesc"></p>
+                    </a>
+                </div>
+
+                <!--附件-->
+                <div class="bubble_cont primary" ng-if="message.MsgType == CONF.MSGTYPE_APP && message.AppMsgType == CONF.APPMSGTYPE_ATTACH">
+                    <div class="attach">
+                        <div class="attach_bd">
+                            <div class="cover" ng-switch on="message.MMAppMsgFileExt">
+                                <i ng-switch-when="txt" class="icon-txt"></i>
+                                <i ng-switch-when="pdf" class="icon-pdf"></i>
+                                <i ng-switch-when="xls" class="icon-xls"></i>
+                                <i ng-switch-when="xlsx" class="icon-xlsx"></i>
+                                <i ng-switch-when="doc" class="icon-doc"></i>
+                                <i ng-switch-when="docx" class="icon-docx"></i>
+                                <i ng-switch-when="ppt" class="icon-ppt"></i>
+                                <i ng-switch-when="pptx" class="icon-pptx"></i>
+                                <i ng-switch-when="zip" class="icon-zip"></i>
+                                <i ng-switch-when="numbers" class="icon-numbers"></i>
+                                <i ng-switch-when="pages" class="icon-pages"></i>
+                                <i ng-switch-when="key" class="icon-key"></i>
+                                <i ng-switch-default class="icon-unknown"></i>
+                            </div>
+                            <div class="cont">
+                                <p class="title" ng-bind="message.FileName"></p>
+                                <div class="opr">
+                                    <span ng-bind="message.MMAppMsgFileSize"></span>
+                                    <span class="sep">|</span>
+
+                                    <a ng-if="message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_QUEUED
+                                    || message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_SENDING
+                                    || message.MMStatus == CONF.MSG_SEND_STATUS_SENDING
+                                    " ng-click="cancelUploadFile(message)" href="javascript:">Cancel</a>
+                                    <a download ng-if="message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_SUCCESS  && (message.MMStatus == CONF.MSG_SEND_STATUS_SUCC || message.MMStatus === undefined)  " href="{{message.MMAppMsgDownloadUrl}}">Download</a>
+                                    <span ng-if="message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_CANCEL">Cancelled</span>
+                                    <span ng-if="message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_FAIL || message.MMStatus == CONF.MSG_SEND_STATUS_FAIL">Unable to upload</span>
+
+                                    <p ng-if="message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_QUEUED || message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_SENDING" class="progress_bar" ng-show="message.MMUploadProgress < 100">
+                                        <span class="progress" ng-style="{width: message.MMUploadProgress + '%'}"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模版消息 -->
+                <div class="bubble_cont primary" ng-if="message.MsgType == CONF.MSGTYPE_APP && message.AppMsgType == CONF.APPMSGTYPE_READER_TYPE" >
+                    <ul class="reader">
+                        <li ng-repeat="item in message.MMCategory">
+                            <a class="link" href="{{item.url|checkurlFilter}}" target="_blank">
+                                <h4 class="title">{{item.title}}</h4>
+                                <p class="date">{{item.pub_time}}</p>
+                                <img class="cover" mm-src="{{item.cover}}"/>
+                                <p class="desc">{{item.digest}}</p>
+                                <p class="more">Read more >></p>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!--表情消息-->
+            <div  data-cm='{"type":"message","actualSender":"{{message.MMActualSender}}",
+                 "msgType":"{{message.MsgType}}","subType":{{message.SubMsgType||0}},"msgId":"{{message.MsgId}}"}' class="emoticon" ng-if="message.MsgType == CONF.MSGTYPE_EMOTICON">
+                <img  ng-style="message.MMImgStyle" class="custom_emoji msg-img" ng-src="{{message.MMPreviewSrc || getMsgImg(message.MsgId,'big',message)  || message.MMThumbSrc}}"  />
+                <!--<p class="loading" ng-show="message.MMStatus == 1 || message.MMFileStatus == CONF.MM_SEND_FILE_STATUS_FAIL">
+                    <img src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/25x4Rho.gif" alt=""/>
+                </p>-->
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+</script> 
+
+<script type="text/ng-template" id="searchList.html">
+<div jquery-scrollbar search-list-directive class="contacts scrollbar-dynamic">
+    <!--data-height-calc="heightCalc"-->
+    <div mm-repeat="item in allContacts" data-height-calc="heightCalc" data-buffer-height="100" data-no-cache="true">
+        <h4 ng-if='item.type=="header"'  class="contact_title" ng-class="{first:$index==0}">{{item.text}}</h4>
+        <div ng-if='item.type!="header"'
+             contact-item-directive
+             data-class-name="{{selectIndex == item._index?'on':''}}"
+             data-user="item"
+             data-click-user-callback="clickUserCallback"
+             ng-class="{'active':currentContact.UserName == item.UserName}"></div>
+    </div>
+    <div ng-if="!allContacts.length">
+        <h4 class="contact_title">No results found</h4>
+    </div>
+</div>
+</script>
+<script type="text/ng-template" id="systemMenu.html">
+<ul class="dropdown_menu">
+    <li>
+        <a tabindex="-1" href="javascript:;" ng-click="createChatroom()" title="New Chat">
+            <i class="menuicon_chat"></i>New Chat        </a>
+    </li>
+    <li>
+        <a tabindex="-1" href="javascript:;" ng-if="!isNotifyOpen" ng-click="openNotify()" title="Alert On">
+            <i class="menuicon_push_off"></i>Alert On        </a>
+        <a tabindex="-1" href="javascript:;" ng-if="isNotifyOpen" ng-click="closeNotify()" title="Alert Off">
+            <i class="menuicon_push_on"></i>Alert Off        </a>
+    </li>
+    <li>
+        <a tabindex="-1" href="javascript:;" ng-if="!isSoundOpen" ng-click="openSound()" title="Sound On">
+            <i class="menuicon_volume_mute"></i>Sound On        </a>
+        <a tabindex="-1" href="javascript:;" ng-if="isSoundOpen" ng-click="closeSound()" title="Sound Off">
+            <i class="menuicon_volume_on"></i>Sound Off        </a>
+    </li>
+    <li>
+        <a tabindex="-1" href="javascript:;" ng-click="feedback()" title="Feedback">
+            <i class="menuicon_feedback"></i>Feedback        </a>
+    </li>
+    <li class="last_child">
+        <a tabindex="-1" href="javascript:;" ng-click="loginout()" title="Log Out">
+            <i class="menuicon_quit"></i>Log Out        </a>
+    </li>
+</ul>
+
+</script> 
+
+<script type="text/ng-template" id="readMenu.html">
+<ul class="dropdown_menu">
+    <li>
+        <a href="javascript:;" title="Copy Link" clip-copy="copyLink()" clip-click="copyCallback()">
+            <i class="menuicon_copylink"></i>
+            Copy Link        </a>
+    </li>
+    <!--<li>-->
+        <!--<a href="javascript:;" title="Forward" ng-click="forwarding()">Forward</a>-->
+    <!--</li>-->
+    <li class="last_child">
+        <a href="javascript:;" title="New Tab" ng-click="openTab()">
+            <i class="menuicon_newtab"></i>
+            New Tab        </a>
+    </li>
+</ul>
+
+</script> 
+<script type="text/ng-template" id="preview.html">
+<div class="mask preview_mask" ></div>
+<div class="img_preview_container" id="preview_container" ng-class="{loading: !isLoaded}" ng-style="containerStyle">
+    <div class="img_container" id="img_container">
+        <div class="img_wrp" id="img_dom" >
+            <!-- webkit 的 transform 有导致不 reflow 的bug，强行改变其子元素来强制reflow-->
+            <span ng-if="reflowFlag"></span>
+            <img class="rotate{{rotateDeg}}" ng-show="isLoaded" id="img_preview" />
+            <a href="javascript:" ng-click="actions.close();" class="img_preview_close" title="Close"><i class="web_wechat_close-window"></i></a>
+        </div>
+    </div>
+    <div class="img_opr_container" id="img_opr_container">
+        <ul class="img_opr_list">
+            <li class="img_opr_item">
+                <a ng-click="actions.prev()" href="javascript:" title="Show Previous">
+                    <i class="web_wechat_left" ng-class="{'web_wechat_left_disable': current <= 0}"></i>&nbsp;
+                </a>
+            </li>
+            <li class="img_opr_item">
+                <a download href="{{imageList[current].url + '&fun=download'}}" title="Down Image">
+                    <i class="web_wechat_download"></i>&nbsp;
+                </a>
+            </li>
+            <li class="img_opr_item" ng-hide="isIE">
+                <a ng-click="actions.rotate()" href="javascript:" title="Rotate Image">
+                    <i class="web_wechat_turn"></i>&nbsp;
+                </a>
+            </li>
+            <li class="img_opr_item">
+                <a ng-click="actions.next()" href="javascript:" title="Show Next">
+                    <i class="web_wechat_right" ng-class="{'web_wechat_right_disable': current >= imageList.length - 1}"></i>&nbsp;
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+</script>
+<script type="text/ng-template" id="mmRepeatDirective.html">
+<div style="height: {{topPlaceHoldHeight}}px" class="top-placeholder"></div>
+    <div class="ng-repeat" ng-repeat="ngRepeat">
+        <div ng-transclude>
+
+        </div>
+    </div>
+<div style="height: {{bottomPlaceHoldHeight}}px" class="bottom-placeholder"></div>
+</script>
+
+<script type="text/ng-template" id="comfirmTips.html">
+<div class="dialog_hd">
+    <h3 class="title">
+        {{title}}
+    </h3>
+</div>
+<div class="dialog_bd" style="text-align:center;padding:40px 0;">
+    {{content}}
+</div>
+<div class="dialog_ft">
+    <a href="javascript:;" class="btn btn_primary" ng-click="callback()">OK</a>
+</div>
+</script> 
+<script type="text/ng-template" id="editorDialog.html">
+<div class="dialog_hd">
+    <h3 class="title">Edit Group Name</h3>
+</div>
+<div class="dialog_bd">
+    <div contenteditable="true" ng-bind-html="text" class="chatroom_name" ng-keydown="keypress($event);"></div>
+</div>
+<div class="dialog_ft">
+    <a class="button_primary" href="javascript:" ng-click="send()">OK</a>
+</div>
+</script>
+<script type="text/ng-template" id="contactPicker.html">
+<div>
+    <!--BEGIN selector-->
+    <div class="selector">
+        <div class="contactor" ng-repeat="user in selectList">
+            <div class="avatar">
+                <img class="img" src="//res.wx.qq.com/a/wx_fed/webwx/res/static/img/2KriyDK.png" mm-src="{{user.HeadImgUrl}}" alt=""/>
+            </div>
+            <div class="opt"><i class="web_wechat_delete" ng-click="delUser(user.UserName)"></i></div>
+        </div>
+        <div class="input_box">
+            <i class="addchat_searchicon"></i>
+            <input type="text" class="input" placeholder='Search' ng-model="keyword" ng-input="search($event)" autofocus/>
+        </div>
+    </div>
+    <div id="selector_search"></div>
+    <!--END selector-->
+    <!--BEGIN contact list-->
+   <!-- <div contact-list-chooser-directive
+         data-all-contacts="contactList"
+         data-is-check="isCheck"
+         data-click-user-callback="toggleUser"></div>-->
+
+    <div class="chooser" ng-class="{choose2: selectList.length >= 7}">
+        <div jquery-scrollbar id="J_ContactPickerScrollBody"  class="contacts scrollbar-dynamic">
+            <!--BEGIN star contact list-->
+            <div mm-repeat="item in contactList" data-height-calc="heightCalc" data-buffer-height="100" data-no-cache="true"
+                 mm-repeat-keyboard mm-repeat-keyboard-scroll-selector="#J_ContactPickerScrollBody" >
+                <h4 ng-if='item.type=="header"'  class="contact_title">{{item.text}}</h4>
+                <div ng-if='item.type!="header"'
+                     contact-item-chooser-directive
+                     data-user="item"
+                     data-is-check="isCheck"
+                     data-click-user-callback="toggleUser" ng-class="{active:item.UserName==current.UserName}"></div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!--END contact list-->
+</div>
+</script>
+<script type="text/ng-template" id="transpond.dialog.html">
+<div class="dialog_hd">
+    <h3 class="title">Forward</h3>
+</div>
+<div class="dialog_bd" id="createChatRoomContainer">
+
+    <div  contact-picker data-init-list="initList" data-pick-config="pickConfig" data-select-list="selectedUsers"  >
+
+    </div>
+</div>
+<div class="dialog_ft" >
+    <a href="javascript:;" ng-click="send()" class="button_default" ng-class="{button_primary:selectedUsers.length&&selectedUsers.length<=200}">OK<span ng-if="selectedUsers.length">({{selectedUsers.length}})</span></a>
+  <!--  <a ng-if="selectedUsers.length && ngDialogData.isCreate" ng-click="create()" href="javascript:;" class="button_primary">OK<span ng-if="selectedUsers.length">({{selectedUsers.length}})</span></a>
+    <a ng-if="selectedUsers.length && ngDialogData.isAdd" ng-click="add()" href="javascript:;" class="button_primary">OK<span ng-if="selectedUsers.length">({{selectedUsers.length}})</span></a>-->
+</div>
+
+<div class="dialog-confirm" ng-show="comfirming">
+    <div class="user-container">
+        <div class="users">
+            <div class="user" ng-if="$index < 14" ng-repeat="user in selectedUsers">
+                <div class="avatar">
+                    <img class="img" mm-src="{{user.HeadImgUrl}}" alt="">
+                </div>
+                <span ng-bind-html="user.getDisplayName()"></span>
+            </div>
+            <div class="user" ng-if="selectedUsers.length>14">
+                <div class="more"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="info">
+        <div class="count">
+            Total  <span class="num"> {{selectedUsers.length}} </span> chats         </div>
+        <div class="desc">
+            Confirm to forward?        </div>
+    </div>
+    <div class="buttons">
+        <div class="button" ng-click="cancel()">Cancel</div>
+        <div class="button button-primary" ng-click="ensure()">Send</div>
+    </div>
+
+</div>
+</script> 
+
+
+
+
+    <!--script-->
+    <script type="text/javascript">
+        (function(){
+            window.MMCgi = {
+                isLogin:!!"1"
+            };
+//            window.MMSource = {
+//                /*videoSwfPath:'/zh_CN/htmledition/v2/third_party/video-js-4.11.2/video-js.swf',*/
+//                copySwfPath:'./zh_CN/htmledition/v2/third_party/zeroclipboard-2.0.2/ZeroClipboard.swf',
+//                jplayerSwfPath:'/zh_CN/htmledition/v2/third_party/jPlayer-2.9.2/jquery.jplayer.swf'
+//
+//            };
+            window.MMDEV = location.host.indexOf("dev") > -1;
+        })();
+
+    </script>
+    <!--script-->
+<script>!function(){var n,t={};n=function(n,e){var i=arguments.length;if(i>1)t[n]=e;else if(1==i){if("object"!=typeof n)return t[n];for(var o in n)n.hasOwnProperty(o)&&(t[o]=n[o])}},"_"in window||(window._=n)}();_({"02d9819":"Tips","0d2fc2c":"program initialization failure&#44;Click to confirm the refresh page","599d8df":"Send file error，please refresh and try again","8d521cc":"Click edit note","5a97440":"I am","8d521cc":"Click edit note","8d521cc":"Click edit note","02d9819":"Tips","f45a3d8":"Add friend failed","61e885c":"Empty files are not allowed to be sent","599d8df":"Send file error，please refresh and try again","9a7dbbc":"Send video files not allowed to exceed 20MB","599d8df":"Send file error，please refresh and try again","599d8df":"Send file error，please refresh and try again","76a7e04":"Image upload failed&#44;check your network","82cf63d":"Sorry&#44; the screenshot tool temporarily does not support 64-bit operating system under the IE browser.","112a5c0":"Please check that you have disabled the screenshot plugin. If you have not installed the screenshot plugin&#44; click OK to install.","c5795a7":"Image upload failed. Please check your network","02d9819":"Tips","f45a3d8":"Add friend failed","02d9819":"Tips","0d42740":"Failed to create group chat","02d9819":"Tips","0d42740":"Failed to create group chat","84e4fac":"Unsticky","3d43ff1":"Sticky on Top","1f9be6d":"Edit Group Name","685739c":"Delete","91382d9":"Empty content","7068541":"View details","b5f1591":"Send","0bd10a8":"Add to Contacts","2305051":"Recall","2305051":"Recall","3b61c96":"Quote","d9eb6f5":"「","83b6d34":"」","79d3abe":"Copy","f26ef91":"Download","21e106f":"Forward","2f4aadd":"Delete","b3b6735":"Recent chat","938b111":"The message Web version of the WeChat is not supported","a5627e8":"[Image]","b28dac0":"[Voice]","4078104":"[Video]","1f94b1b":"[Sight]","80f56fb":"[send an emoji&#44; please check on the phone]","2242ac7":"[Send an emoji&#44; view it on mobile]","e230fc1":"[Animated Emoticons]","fdaa3a3":"[Receive a video / voice chat message&#44; view it on your phone]","0e23719":"[music]","4078104":"[Video]","4f20785":"[Application Message]","c4e04ee":"Please click on the phone to open","e5b228c":"[link]","6daeae3":"[file]","0cdad09":"[Received a micro-message transfer message&#44; please view on the phone]","c534fc3":"[Receive a coupon message&#44; view it on your phone]","8e94ca5":"I initiated location sharing. Please check it on your phone","a41d576":"The other","a1f1299":"Initiated location sharing&#44; please check on the phone","95afe20":"[receive a scan message&#44; please check on the phone]","355765a":"[receive a commodity message&#44; please check on the phone]","9d7f4bb":"[receive an expression sharing message&#44; please check on the phone]","e24e75c":"[Red Packet]","ded861c":" withdrew a message","df1fd91":"You","ebeaf99":"want to be your friend","ebeaf99":"want to be your friend","9a2223f":"You recommend","dd14577":"Recommend to you","809bb9d":"[sticker]","df1fd91":"You","ded861c":" withdrew a message","df1fd91":"You","ded861c":" withdrew a message","6c2fc35":"WeChat Team","eb7ec65":"File Transfer","0469c27":"Tencent News","a82c4c4":"Friend recommendation message","f13fb20":"Starred","59d29a3":"Friend","4b0ab7b":"Groups","215feec":"Official Accounts","2f521c5":"WeChat for Web","cfbf6f4":"WeChat","845ec73":"Image failed to load. Please close and try again.","809bb9d":"[sticker]","562d747":"Sunday","1603b06":"Monday","b5a6a07":"Tuesday","e60725e":"Wednesday","170fc8e":"Thursday","eb79cea":"Friday","2457513":"Saturday"});</script><script src="//res.wx.qq.com/a/wx_fed/webwx/res/static/vendor/vendor_fe62088.js"></script><script src="//res.wx.qq.com/a/wx_fed/webwx/res/static/js/index_ca360ff.js"></script></body>
+</html>
